@@ -1,0 +1,36 @@
+version: "3"
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: wurstmeister/kafka
+    ports:
+      - "9094:9094"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: 192.168.99.100
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    depends_on:
+      - zookeeper
+
+  consumer:
+    build: b-consumer  # Değiştirilen isim
+    image: kafka-consumer/consumer:latest
+    environment:
+      - "SPRING_PROFILES_ACTIVE=${ACTIVE_PROFILE}"
+    ports:
+      - "8084:8084"
+    depends_on:
+      - kafka
+
+  producer:
+    build: a-producer  # Değiştirilen isim
+    image: kafka-producer/producer:latest
+    environment:
+      - "SPRING_PROFILES_ACTIVE=${ACTIVE_PROFILE}"
+    ports:
+      - "8086:8086"
+    depends_on:
+      - kafka
